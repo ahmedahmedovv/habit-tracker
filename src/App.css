@@ -84,6 +84,10 @@ button:hover {
 }
 
 .habit-name {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  line-height: 24px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -227,6 +231,10 @@ button:hover {
 }
 
 .streak-badge {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  line-height: 24px;
   font-size: 14px;
   white-space: nowrap;
   flex-shrink: 0;
@@ -442,6 +450,10 @@ button:hover {
 }
 
 .timer-display {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  line-height: 24px;
   background-color: #f0f0f0;
   padding: 4px 8px;
   border-radius: 4px;
@@ -534,6 +546,48 @@ button:hover {
   .streak-badge,
   .habit-item button.edit,
   .habit-item button.delete {
+    font-size: 12px;
+  }
+}
+
+/* Update button styles for emoji */
+.habit-item button.edit,
+.habit-item button.delete,
+.timer-button {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  background: none;  /* Remove background */
+  border: none;     /* Remove border */
+}
+
+.habit-item button.edit:hover {
+  background-color: #e0e0e0;
+}
+
+.habit-item button.delete:hover {
+  background-color: #ffebee;
+}
+
+.timer-button:hover {
+  background-color: #e3f2fd;
+}
+
+.timer-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media screen and (max-width: 375px) {
+  .habit-item button.edit,
+  .habit-item button.delete,
+  .timer-button {
+    width: 20px;
+    height: 20px;
     font-size: 12px;
   }
 }

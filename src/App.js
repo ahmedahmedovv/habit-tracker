@@ -460,7 +460,7 @@ function App() {
                     min="0"
                     value={habit.timerDuration}
                     onChange={(e) => updateTimerDuration(habit.id, parseInt(e.target.value) || 0)}
-                    placeholder="Seconds"
+                    placeholder="Sec"
                   />
                   {activeTimer === habit.id ? (
                     <span className="timer-display">{timeLeft}s</span>
@@ -475,8 +475,8 @@ function App() {
                   )}
                 </div>
                 <div className="button-group">
-                  <button onClick={() => startEditing(habit)} className="edit">Edit</button>
-                  <button onClick={() => deleteHabit(habit.id)} className="delete">✕</button>
+                  <button onClick={() => startEditing(habit)} className="edit">✏️</button>
+                  <button onClick={() => deleteHabit(habit.id)} className="delete">🗑️</button>
                 </div>
               </div>
             </div>
