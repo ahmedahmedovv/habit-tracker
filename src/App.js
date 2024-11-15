@@ -11,26 +11,74 @@ function App() {
   const [editingText, setEditingText] = useState('');
   const [installPrompt, setInstallPrompt] = useState(null);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [syncStatus, setSyncStatus] = useState('synced'); // 'synced', 'pending', 'error'
+  const [pendingChanges, setPendingChanges] = useState(() => {
+    const savedChanges = localStorage.getItem('pendingChanges');
+    return savedChanges ? JSON.parse(savedChanges) : [];
+  });
 
+  // Handle background sync registration
+  useEffect(() => {
+    const registerSync = async () => {
+      if ('serviceWorker' in navigator && 'sync' in navigator.serviceWorker) {
+        try {
+          const registration = await navigator.serviceWorker.ready;
+          await registration.sync.register('sync-habits');
+        } catch (error) {
+          console.log('Background sync registration failed:', error);
+        }
+      }
+    };
+
+    registerSync();
+  }, []);
+
+  // Handle offline changes
+  useEffect(() => {
+    if (!navigator.onLine && habits.length > 0) {
+      setPendingChanges(prev => [...prev, { timestamp: Date.now(), habits }]);
+      setSyncStatus('pending');
+      localStorage.setItem('pendingChanges', JSON.stringify(pendingChanges));
+    }
+  }, [habits, pendingChanges]);
+
+  // Handle online/offline status
+  useEffect(() => {
+    const syncData = async () => {
+      if (pendingChanges.length > 0) {
+        setSyncStatus('syncing');
+        try {
+          localStorage.setItem('habits', JSON.stringify(habits));
+          setPendingChanges([]);
+          localStorage.removeItem('pendingChanges');
+          setSyncStatus('synced');
+        } catch (error) {
+          setSyncStatus('error');
+        }
+      }
+    };
+
+    const handleOnline = () => {
+      setSyncStatus('syncing');
+      syncData();
+    };
+
+    const handleOffline = () => {
+      setSyncStatus('pending');
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [pendingChanges, habits]);
+
+  // Save to localStorage
   useEffect(() => {
     localStorage.setItem('habits', JSON.stringify(habits));
-
-    // Check if already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setIsInstalled(true);
-    }
-
-    // Listen for install prompt
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      setInstallPrompt(e);
-    });
-
-    // Listen for successful installation
-    window.addEventListener('appinstalled', () => {
-      setIsInstalled(true);
-      setInstallPrompt(null);
-    });
   }, [habits]);
 
   const addHabit = (e) => {
@@ -223,6 +271,14 @@ function App() {
               )}
             </div>
           ))}
+        </div>
+
+        {/* Sync Status Indicator */}
+        <div className={`sync-indicator ${syncStatus}`}>
+          {syncStatus === 'synced' && '✓ All changes saved'}
+          {syncStatus === 'pending' && '⏳ Changes pending...'}
+          {syncStatus === 'syncing' && '↻ Syncing...'}
+          {syncStatus === 'error' && '⚠️ Sync error'}
         </div>
       </div>
     </div>

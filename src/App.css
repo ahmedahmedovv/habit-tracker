@@ -264,3 +264,37 @@ button:hover {
     justify-content: center;
   }
 }
+
+.sync-indicator {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin: 8px 0;
+}
+
+.sync-indicator.synced {
+  color: #4CAF50;
+  background-color: #E8F5E9;
+}
+
+.sync-indicator.pending {
+  color: #FF9800;
+  background-color: #FFF3E0;
+}
+
+.sync-indicator.syncing {
+  color: #2196F3;
+  background-color: #E3F2FD;
+}
+
+.sync-indicator.error {
+  color: #F44336;
+  background-color: #FFEBEE;
+}
+
+@media screen and (max-width: 480px) {
+  .sync-indicator {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
