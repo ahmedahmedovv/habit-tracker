@@ -406,7 +406,7 @@ function App() {
                   </div>
                   <div className="button-group">
                     <button onClick={() => startEditing(habit)} className="edit">Edit</button>
-                    <button onClick={() => deleteHabit(habit.id)} className="delete">Delete</button>
+                    <button onClick={() => deleteHabit(habit.id)} className="delete">✕</button>
                   </div>
                 </>
               )}
