@@ -9,9 +9,28 @@ function App() {
   const [newHabit, setNewHabit] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [editingText, setEditingText] = useState('');
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('habits', JSON.stringify(habits));
+
+    // Check if already installed
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setIsInstalled(true);
+    }
+
+    // Listen for install prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    });
+
+    // Listen for successful installation
+    window.addEventListener('appinstalled', () => {
+      setIsInstalled(true);
+      setInstallPrompt(null);
+    });
   }, [habits]);
 
   const addHabit = (e) => {
@@ -118,10 +137,27 @@ function App() {
     event.target.value = '';
   };
 
+  const handleInstallClick = async () => {
+    if (!installPrompt) return;
+    
+    const result = await installPrompt.prompt();
+    if (result.outcome === 'accepted') {
+      setInstallPrompt(null);
+    }
+  };
+
   return (
     <div className="App">
       <div className="habit-tracker">
         <h1>Habit Tracker</h1>
+        
+        {installPrompt && !isInstalled && (
+          <div className="install-prompt">
+            <button onClick={handleInstallClick} className="install-button">
+              📱 Install App
+            </button>
+          </div>
+        )}
         
         <div className="data-controls">
           <button onClick={exportData} className="export">
