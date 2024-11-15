@@ -85,11 +85,59 @@ function App() {
     setEditingText('');
   };
 
+  const exportData = () => {
+    const habitData = JSON.stringify(habits, null, 2);
+    const blob = new Blob([habitData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `habits-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const importData = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const importedHabits = JSON.parse(e.target.result);
+        setHabits(importedHabits);
+      } catch (error) {
+        alert('Error importing habits. Please check the file format.');
+      }
+    };
+    reader.readAsText(file);
+    // Reset file input
+    event.target.value = '';
+  };
+
   return (
     <div className="App">
       <div className="habit-tracker">
         <h1>Habit Tracker</h1>
         
+        <div className="data-controls">
+          <button onClick={exportData} className="export">
+            ↓ Export
+          </button>
+          <label className="import-label">
+            ↑ Import
+            <input
+              type="file"
+              accept=".json"
+              onChange={importData}
+              className="import-input"
+            />
+          </label>
+        </div>
+
         <form onSubmit={addHabit}>
           <input
             type="text"

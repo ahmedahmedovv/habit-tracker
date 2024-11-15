@@ -192,3 +192,37 @@ button:hover {
     margin-top: 0;
   }
 }
+
+.data-controls {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.export, .import-label {
+  padding: 8px 12px;
+  font-size: 14px;
+  background-color: #eee;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.export:hover, .import-label:hover {
+  background-color: #ddd;
+}
+
+.import-input {
+  display: none;
+}
+
+@media screen and (max-width: 480px) {
+  .data-controls {
+    gap: 6px;
+  }
+  
+  .export, .import-label {
+    flex: 1;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+}
