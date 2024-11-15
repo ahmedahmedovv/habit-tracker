@@ -374,3 +374,53 @@ button:hover {
     padding: 3px 6px;
   }
 }
+
+.timer-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.timer-controls input {
+  width: 70px;
+  padding: 4px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.timer-button {
+  background-color: #2196F3;
+  padding: 4px 8px;
+  font-size: 14px;
+}
+
+.timer-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.timer-display {
+  background-color: #f0f0f0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  min-width: 50px;
+  text-align: center;
+}
+
+@media screen and (max-width: 480px) {
+  .timer-controls {
+    flex-wrap: wrap;
+  }
+  
+  .timer-controls input {
+    width: 60px;
+    font-size: 13px;
+  }
+  
+  .timer-button {
+    font-size: 13px;
+    padding: 3px 6px;
+  }
+}

@@ -34,6 +34,8 @@ function App() {
   const [lastError, setLastError] = useState(null);
   const [syncSupported, setSyncSupported] = useState(false);
   const [hasErrors, setHasErrors] = useState(false);
+  const [activeTimer, setActiveTimer] = useState(null); // Add this state
+  const [timeLeft, setTimeLeft] = useState(0);         // Add this state
 
   // Check for sync support and register if available
   useEffect(() => {
@@ -119,7 +121,8 @@ function App() {
       completed: false,
       streak: 0,
       lastCompleted: null,
-      startDate: new Date().toISOString()
+      startDate: new Date().toISOString(),
+      timerDuration: 0,  // Add this field
     }]);
     setNewHabit('');
   };
@@ -335,6 +338,40 @@ function App() {
     };
   }, [habits]);
 
+  // Add these new functions
+  const startTimer = (habitId, duration) => {
+    if (activeTimer) return; // Prevent multiple timers
+    
+    setActiveTimer(habitId);
+    setTimeLeft(duration);
+    
+    const timerInterval = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        if (prevTime <= 1) {
+          clearInterval(timerInterval);
+          setActiveTimer(null);
+          showNotification(habitId);
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+
+    // Clean up the interval if component unmounts
+    return () => clearInterval(timerInterval);
+  };
+
+  const showNotification = (habitId) => {
+    const habit = habits.find(h => h.id === habitId);
+    alert(`Timer Complete!\nFinished: ${habit.name}`);
+  };
+
+  const updateTimerDuration = (habitId, duration) => {
+    setHabits(habits.map(habit =>
+      habit.id === habitId ? { ...habit, timerDuration: duration } : habit
+    ));
+  };
+
   return (
     <div className="App">
       <div className="habit-tracker">
@@ -403,6 +440,26 @@ function App() {
                         🔥 {habit.streak} day{habit.streak !== 1 ? 's' : ''}
                       </span>
                     )}
+                    <div className="timer-controls">
+                      <input
+                        type="number"
+                        min="0"
+                        value={habit.timerDuration}
+                        onChange={(e) => updateTimerDuration(habit.id, parseInt(e.target.value) || 0)}
+                        placeholder="Seconds"
+                      />
+                      {activeTimer === habit.id ? (
+                        <span className="timer-display">{timeLeft}s</span>
+                      ) : (
+                        <button
+                          onClick={() => startTimer(habit.id, habit.timerDuration)}
+                          disabled={!habit.timerDuration}
+                          className="timer-button"
+                        >
+                          ⏱️ Start
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div className="button-group">
                     <button onClick={() => startEditing(habit)} className="edit">Edit</button>
