@@ -4,6 +4,8 @@ import './App.css';
 function App() {
   const [habits, setHabits] = useState([]);
   const [newHabit, setNewHabit] = useState('');
+  const [editingId, setEditingId] = useState(null);
+  const [editingText, setEditingText] = useState('');
 
   const addHabit = (e) => {
     e.preventDefault();
@@ -25,6 +27,26 @@ function App() {
 
   const deleteHabit = (id) => {
     setHabits(habits.filter(habit => habit.id !== id));
+  };
+
+  const startEditing = (habit) => {
+    setEditingId(habit.id);
+    setEditingText(habit.name);
+  };
+
+  const saveEdit = (id) => {
+    if (!editingText.trim()) return;
+    
+    setHabits(habits.map(habit =>
+      habit.id === id ? { ...habit, name: editingText.trim() } : habit
+    ));
+    setEditingId(null);
+    setEditingText('');
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditingText('');
   };
 
   return (
@@ -50,10 +72,28 @@ function App() {
                 checked={habit.completed}
                 onChange={() => toggleHabit(habit.id)}
               />
-              <span className={habit.completed ? 'completed' : ''}>
-                {habit.name}
-              </span>
-              <button onClick={() => deleteHabit(habit.id)}>Delete</button>
+              {editingId === habit.id ? (
+                <div className="edit-mode">
+                  <input
+                    type="text"
+                    value={editingText}
+                    onChange={(e) => setEditingText(e.target.value)}
+                    autoFocus
+                  />
+                  <button onClick={() => saveEdit(habit.id)} className="save">Save</button>
+                  <button onClick={cancelEdit} className="cancel">Cancel</button>
+                </div>
+              ) : (
+                <>
+                  <span className={habit.completed ? 'completed' : ''}>
+                    {habit.name}
+                  </span>
+                  <div className="button-group">
+                    <button onClick={() => startEditing(habit)} className="edit">Edit</button>
+                    <button onClick={() => deleteHabit(habit.id)} className="delete">Delete</button>
+                  </div>
+                </>
+              )}
             </div>
           ))}
         </div>

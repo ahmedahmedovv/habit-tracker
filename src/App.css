@@ -99,3 +99,71 @@ button:hover {
     font-size: 24px;
   }
 }
+
+.edit-mode {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+}
+
+.edit-mode input {
+  flex: 1;
+}
+
+.button-group {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.habit-item button.edit {
+  background-color: #2196F3;
+}
+
+.habit-item button.edit:hover {
+  background-color: #1976D2;
+}
+
+.habit-item button.save {
+  background-color: #4CAF50;
+}
+
+.habit-item button.save:hover {
+  background-color: #45a049;
+}
+
+.habit-item button.cancel {
+  background-color: #9e9e9e;
+}
+
+.habit-item button.cancel:hover {
+  background-color: #757575;
+}
+
+.habit-item button.delete {
+  background-color: #ff4444;
+}
+
+.habit-item button.delete:hover {
+  background-color: #cc0000;
+}
+
+@media screen and (max-width: 480px) {
+  .edit-mode {
+    flex-wrap: wrap;
+  }
+  
+  .edit-mode input {
+    width: 100%;
+    min-width: 0;
+  }
+  
+  .button-group {
+    flex-wrap: wrap;
+  }
+  
+  .habit-item button {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+}
