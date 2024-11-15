@@ -298,3 +298,38 @@ button:hover {
     padding: 3px 6px;
   }
 }
+
+.error-banner {
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.error-dismiss {
+  background: none;
+  border: none;
+  color: #856404;
+  cursor: pointer;
+  padding: 0 8px;
+}
+
+.debug-button {
+  background-color: #6c757d;
+  color: white;
+  padding: 4px 8px;
+  font-size: 12px;
+  margin: 8px 0;
+}
+
+@media screen and (max-width: 480px) {
+  .error-banner {
+    font-size: 13px;
+    padding: 8px;
+  }
+}
