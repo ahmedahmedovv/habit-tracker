@@ -420,7 +420,7 @@ function App() {
 
         <div className="habits-list">
           {habits.map(habit => (
-            <div key={habit.id} className="habit-item">
+            <div key={habit.id} className={`habit-item ${habit.completed ? 'completed' : ''}`}>
               {editingId === habit.id ? (
                 // Edit mode
                 <div className="habit-left">
@@ -449,10 +449,10 @@ function App() {
                     <input
                       type="checkbox"
                       checked={habit.completed}
-                      onChange={() => {}} // Empty onChange to avoid React warning
-                      onClick={(e) => e.stopPropagation()} // Prevent double-toggle when clicking checkbox directly
+                      onChange={() => {}}
+                      onClick={(e) => e.stopPropagation()}
                     />
-                    <span className={`habit-name ${habit.completed ? 'completed' : ''}`}>
+                    <span className="habit-name">
                       {habit.name}
                     </span>
                   </div>

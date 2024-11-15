@@ -7,9 +7,9 @@
 }
 
 .habit-tracker {
+  width: 95%;
   max-width: 500px;
   margin: 0 auto;
-  width: 90%;
 }
 
 form {
@@ -61,43 +61,83 @@ button:hover {
 .habit-item {
   display: flex;
   align-items: center;
-  padding: 8px 4px;
-  border-bottom: 1px solid #eee;
   justify-content: space-between;
+  padding: 6px 8px;
+  border-bottom: 1px solid #eee;
   gap: 8px;
-  min-height: 40px;
+  min-height: 36px;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+}
+
+.habit-item.completed {
+  background-color: #e8f5e9;
+}
+
+.habit-item.completed:hover {
+  background-color: #c8e6c9;
+}
+
+.habit-item.completed .habit-name,
+.habit-item.completed .streak-badge,
+.habit-item.completed .timer-display {
+  color: #2e7d32;
 }
 
 .habit-left {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   flex: 1;
   min-width: 0;
   cursor: pointer;
   padding: 4px;
-  border-radius: 4px;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
 }
 
 .habit-left:hover {
-  background-color: #f5f5f5;
+  background: rgba(0, 0, 0, 0.05);
 }
 
-.habit-left:active {
-  background-color: #eeeeee;
+.habit-left.completed {
+  background-color: #e8f5e9;
 }
 
-.habit-left input[type="checkbox"] {
-  cursor: pointer;
+.habit-left.completed:hover {
+  background-color: #c8e6c9;
+}
+
+.habit-left.completed .habit-name {
+  color: #2e7d32;
+  text-decoration: none;
+}
+
+.habit-left {
+  position: relative;
+  overflow: hidden;
+}
+
+.habit-left::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #4CAF50;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.habit-left.completed::after {
+  opacity: 0.1;
 }
 
 .habit-right {
   display: flex;
   align-items: center;
   gap: 6px;
-  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .habit-name {
@@ -510,7 +550,7 @@ button:hover {
   }
   
   .habit-item {
-    padding: 6px 4px;
+    padding: 6px 6px;
     gap: 4px;
     min-height: 36px;
   }
