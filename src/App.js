@@ -1,11 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
-  const [habits, setHabits] = useState([]);
+  const [habits, setHabits] = useState(() => {
+    const savedHabits = localStorage.getItem('habits');
+    return savedHabits ? JSON.parse(savedHabits) : [];
+  });
   const [newHabit, setNewHabit] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [editingText, setEditingText] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('habits', JSON.stringify(habits));
+  }, [habits]);
 
   const addHabit = (e) => {
     e.preventDefault();
@@ -14,15 +21,44 @@ function App() {
     setHabits([...habits, {
       id: Date.now(),
       name: newHabit,
-      completed: false
+      completed: false,
+      streak: 0,
+      lastCompleted: null,
+      startDate: new Date().toISOString()
     }]);
     setNewHabit('');
   };
 
   const toggleHabit = (id) => {
-    setHabits(habits.map(habit => 
-      habit.id === id ? { ...habit, completed: !habit.completed } : habit
-    ));
+    const today = new Date().toISOString().split('T')[0];
+    
+    setHabits(habits.map(habit => {
+      if (habit.id !== id) return habit;
+
+      const lastCompletedDate = habit.lastCompleted ? 
+        new Date(habit.lastCompleted).toISOString().split('T')[0] : null;
+      
+      // If already completed today, uncomplete it
+      if (lastCompletedDate === today) {
+        return {
+          ...habit,
+          completed: false,
+          streak: Math.max(0, habit.streak - 1),
+          lastCompleted: null
+        };
+      }
+
+      // If completing for the first time or continuing streak
+      const isNextDay = lastCompletedDate &&
+        new Date(today) - new Date(lastCompletedDate) <= 1000 * 60 * 60 * 24;
+      
+      return {
+        ...habit,
+        completed: true,
+        streak: isNextDay ? habit.streak + 1 : 1,
+        lastCompleted: new Date().toISOString()
+      };
+    }));
   };
 
   const deleteHabit = (id) => {
@@ -85,9 +121,16 @@ function App() {
                 </div>
               ) : (
                 <>
-                  <span className={habit.completed ? 'completed' : ''}>
-                    {habit.name}
-                  </span>
+                  <div className="habit-info">
+                    <span className={habit.completed ? 'completed' : ''}>
+                      {habit.name}
+                    </span>
+                    {habit.streak > 0 && (
+                      <span className="streak-badge">
+                        🔥 {habit.streak} day{habit.streak !== 1 ? 's' : ''}
+                      </span>
+                    )}
+                  </div>
                   <div className="button-group">
                     <button onClick={() => startEditing(habit)} className="edit">Edit</button>
                     <button onClick={() => deleteHabit(habit.id)} className="delete">Delete</button>
