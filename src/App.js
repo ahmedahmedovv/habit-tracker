@@ -191,12 +191,15 @@ function App() {
     setEditingText(habit.name);
   };
 
-  const saveEdit = (id) => {
+  const saveEdit = () => {
     if (!editingText.trim()) return;
     
-    setHabits(habits.map(habit =>
-      habit.id === id ? { ...habit, name: editingText.trim() } : habit
+    setHabits(habits.map(habit => 
+      habit.id === editingId 
+        ? { ...habit, name: editingText.trim() }
+        : habit
     ));
+    
     setEditingId(null);
     setEditingText('');
   };
@@ -437,48 +440,68 @@ function App() {
         <div className="habits-list">
           {habits.map(habit => (
             <div key={habit.id} className="habit-item">
-              <div className="habit-left">
-                <input
-                  type="checkbox"
-                  checked={habit.completed}
-                  onChange={() => toggleHabit(habit.id)}
-                />
-                <span className={`habit-name ${habit.completed ? 'completed' : ''}`}>
-                  {habit.name}
-                </span>
-              </div>
-              
-              <div className="habit-right">
-                {habit.streak > 0 && (
-                  <span className="streak-badge">
-                    🔥 {habit.streak} day{habit.streak !== 1 ? 's' : ''}
-                  </span>
-                )}
-                <div className="timer-controls">
+              {editingId === habit.id ? (
+                // Edit mode
+                <div className="habit-left">
                   <input
-                    type="number"
-                    min="0"
-                    value={habit.timerDuration}
-                    onChange={(e) => updateTimerDuration(habit.id, parseInt(e.target.value) || 0)}
-                    placeholder="Sec"
+                    type="text"
+                    value={editingText}
+                    onChange={(e) => setEditingText(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && saveEdit()}
+                    autoFocus
                   />
-                  {activeTimer === habit.id ? (
-                    <span className="timer-display">{timeLeft}s</span>
-                  ) : (
-                    <button
-                      onClick={() => startTimer(habit.id, habit.timerDuration)}
-                      disabled={!habit.timerDuration}
-                      className="timer-button"
-                    >
-                      ⏱️
-                    </button>
-                  )}
+                  <div className="button-group">
+                    <button onClick={saveEdit} className="save">✅</button>
+                    <button onClick={cancelEdit} className="cancel">❌</button>
+                  </div>
                 </div>
-                <div className="button-group">
-                  <button onClick={() => startEditing(habit)} className="edit">✏️</button>
-                  <button onClick={() => deleteHabit(habit.id)} className="delete">🗑️</button>
-                </div>
-              </div>
+              ) : (
+                // Normal mode
+                <>
+                  <div className="habit-left">
+                    <input
+                      type="checkbox"
+                      checked={habit.completed}
+                      onChange={() => toggleHabit(habit.id)}
+                    />
+                    <span className={`habit-name ${habit.completed ? 'completed' : ''}`}>
+                      {habit.name}
+                    </span>
+                  </div>
+                  
+                  <div className="habit-right">
+                    {habit.streak > 0 && (
+                      <span className="streak-badge">
+                        🔥 {habit.streak} day{habit.streak !== 1 ? 's' : ''}
+                      </span>
+                    )}
+                    <div className="timer-controls">
+                      <input
+                        type="number"
+                        min="0"
+                        value={habit.timerDuration}
+                        onChange={(e) => updateTimerDuration(habit.id, parseInt(e.target.value) || 0)}
+                        placeholder="Sec"
+                      />
+                      {activeTimer === habit.id ? (
+                        <span className="timer-display">{timeLeft}s</span>
+                      ) : (
+                        <button
+                          onClick={() => startTimer(habit.id, habit.timerDuration)}
+                          disabled={!habit.timerDuration}
+                          className="timer-button"
+                        >
+                          ⏱️
+                        </button>
+                      )}
+                    </div>
+                    <div className="button-group">
+                      <button onClick={() => startEditing(habit)} className="edit">✏️</button>
+                      <button onClick={() => deleteHabit(habit.id)} className="delete">🗑️</button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           ))}
         </div>
