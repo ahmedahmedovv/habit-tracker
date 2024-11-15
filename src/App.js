@@ -283,6 +283,58 @@ function App() {
     }
   };
 
+  // Add daily reset check
+  useEffect(() => {
+    const checkDailyReset = () => {
+      const lastResetDate = localStorage.getItem('lastResetDate');
+      const today = new Date().toISOString().split('T')[0];
+      
+      if (lastResetDate !== today) {
+        // Reset all habits' completion status
+        setHabits(habits.map(habit => ({
+          ...habit,
+          completed: false,
+          // Keep the streak if completed yesterday, otherwise reset
+          streak: habit.lastCompleted && 
+            new Date(habit.lastCompleted).toISOString().split('T')[0] === 
+            new Date(Date.now() - 86400000).toISOString().split('T')[0]
+            ? habit.streak 
+            : 0,
+        })));
+        
+        localStorage.setItem('lastResetDate', today);
+      }
+    };
+
+    // Check on mount and when tab becomes visible
+    checkDailyReset();
+    
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkDailyReset();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Set up interval to check near midnight
+    const now = new Date();
+    const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    const timeUntilMidnight = tomorrow - now;
+
+    const midnightTimeout = setTimeout(() => {
+      checkDailyReset();
+      // After first midnight, check every 24 hours
+      const dailyInterval = setInterval(checkDailyReset, 24 * 60 * 60 * 1000);
+      return () => clearInterval(dailyInterval);
+    }, timeUntilMidnight);
+
+    return () => {
+      clearTimeout(midnightTimeout);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [habits]);
+
   return (
     <div className="App">
       <div className="habit-tracker">
