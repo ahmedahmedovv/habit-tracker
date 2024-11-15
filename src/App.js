@@ -10,24 +10,6 @@ const ERROR_TYPES = {
   DATA: 'DATA_ERROR'
 };
 
-// Custom error logger
-const logError = (type, error, details = {}) => {
-  const errorLog = {
-    type,
-    timestamp: new Date().toISOString(),
-    message: error.message,
-    stack: error.stack,
-    details,
-  };
-  
-  // Save error to localStorage for debugging
-  const errors = JSON.parse(localStorage.getItem('habitTrackerErrors') || '[]');
-  errors.push(errorLog);
-  localStorage.setItem('habitTrackerErrors', JSON.stringify(errors.slice(-10))); // Keep last 10 errors
-  
-  console.error('Habit Tracker Error:', errorLog);
-};
-
 function App() {
   const [habits, setHabits] = useState(() => {
     try {
@@ -50,82 +32,82 @@ function App() {
   });
   const [errorMessage, setErrorMessage] = useState(null);
   const [lastError, setLastError] = useState(null);
+  const [syncSupported, setSyncSupported] = useState(false);
+  const [hasErrors, setHasErrors] = useState(false);
 
-  // Handle background sync registration
+  // Check for sync support and register if available
   useEffect(() => {
-    const registerSync = async () => {
+    const initializeSync = async () => {
       try {
+        // Check for Service Worker support
         if (!('serviceWorker' in navigator)) {
-          throw new Error('Service Worker not supported');
-        }
-        if (!('sync' in navigator.serviceWorker)) {
-          throw new Error('Background Sync not supported');
+          console.log('Service Workers not supported - falling back to local storage');
+          return;
         }
 
-        const registration = await navigator.serviceWorker.ready;
-        await registration.sync.register('sync-habits');
+        // Register service worker first
+        const registration = await navigator.serviceWorker.register('/serviceWorker.js');
+        
+        // Then check for sync support
+        if ('sync' in registration) {
+          setSyncSupported(true);
+          await registration.sync.register('sync-habits');
+          console.log('Background sync registered successfully');
+        } else {
+          console.log('Background Sync not supported - falling back to local storage');
+        }
       } catch (error) {
         logError(ERROR_TYPES.SERVICE_WORKER, error);
-        setErrorMessage('Background sync not available');
+        console.log('Using local storage fallback');
       }
     };
 
-    registerSync();
+    initializeSync();
   }, []);
 
-  // Handle offline changes
+  // Handle data persistence with fallback
   useEffect(() => {
-    if (!navigator.onLine && habits.length > 0) {
-      setPendingChanges(prev => [...prev, { timestamp: Date.now(), habits }]);
-      setSyncStatus('pending');
-      localStorage.setItem('pendingChanges', JSON.stringify(pendingChanges));
-    }
-  }, [habits, pendingChanges]);
-
-  // Handle online/offline status
-  useEffect(() => {
-    const syncData = async () => {
-      if (pendingChanges.length === 0) return;
-
-      setSyncStatus('syncing');
+    const saveData = async () => {
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
+        // Always save to localStorage as primary or fallback
         localStorage.setItem('habits', JSON.stringify(habits));
-        setPendingChanges([]);
-        localStorage.removeItem('pendingChanges');
-        setSyncStatus('synced');
-        setErrorMessage(null);
+        
+        if (!navigator.onLine) {
+          setSyncStatus('pending');
+          return;
+        }
+
+        if (syncSupported) {
+          setSyncStatus('syncing');
+          // If sync is supported, queue sync event
+          const registration = await navigator.serviceWorker.ready;
+          await registration.sync.register('sync-habits');
+        } else {
+          // If sync not supported, just mark as synced after localStorage save
+          setSyncStatus('synced');
+        }
       } catch (error) {
-        logError(ERROR_TYPES.SYNC, error, { pendingChanges });
-        setSyncStatus('error');
-        setErrorMessage('Sync failed. Will retry automatically.');
+        logError(ERROR_TYPES.STORAGE, error, { habits });
+        setErrorMessage('Failed to save changes');
       }
     };
 
-    const handleOnline = () => syncData();
-    const handleOffline = () => setSyncStatus('pending');
+    saveData();
+  }, [habits, syncSupported]);
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, [habits, pendingChanges]);
-
-  // Save to localStorage with error handling
-  useEffect(() => {
-    try {
-      localStorage.setItem('habits', JSON.stringify(habits));
-    } catch (error) {
-      logError(ERROR_TYPES.STORAGE, error, { habits });
-      setErrorMessage('Failed to save changes');
-      setLastError(error);
+  // Simplified sync status display
+  const getSyncStatusMessage = () => {
+    if (!navigator.onLine) return '📴 Offline - Changes saved locally';
+    if (!syncSupported) return '💾 Saved locally';
+    
+    switch (syncStatus) {
+      case 'synced': return '✓ All changes saved';
+      case 'pending': return '⏳ Changes pending...';
+      case 'syncing': return '↻ Syncing...';
+      case 'error': return '⚠️ Sync error';
+      default: return '';
     }
-  }, [habits]);
+  };
 
   const addHabit = (e) => {
     e.preventDefault();
@@ -252,13 +234,52 @@ function App() {
     }
   };
 
+  // Updated error logger
+  const logError = (type, error, details = {}) => {
+    const errorLog = {
+      type,
+      timestamp: new Date().toISOString(),
+      message: error.message,
+      stack: error.stack,
+      details,
+    };
+    
+    try {
+      const errors = JSON.parse(localStorage.getItem('habitTrackerErrors') || '[]');
+      errors.push(errorLog);
+      localStorage.setItem('habitTrackerErrors', JSON.stringify(errors.slice(-10)));
+      setHasErrors(true); // Set flag when error occurs
+    } catch (e) {
+      console.error('Failed to log error:', e);
+    }
+    
+    console.error('Habit Tracker Error:', errorLog);
+  };
+
   // Debug helper
   const showErrorLogs = () => {
     try {
       const errors = JSON.parse(localStorage.getItem('habitTrackerErrors') || '[]');
       console.table(errors);
+      // Clear errors after showing them
+      localStorage.removeItem('habitTrackerErrors');
+      setHasErrors(false);
+      setErrorMessage(null);
     } catch (error) {
       console.error('Failed to load error logs:', error);
+    }
+  };
+
+  // Clear error logs
+  const dismissError = () => {
+    setErrorMessage(null);
+    if (!hasErrors) return;
+    
+    try {
+      localStorage.removeItem('habitTrackerErrors');
+      setHasErrors(false);
+    } catch (error) {
+      console.error('Failed to clear error logs:', error);
     }
   };
 
@@ -341,31 +362,33 @@ function App() {
           ))}
         </div>
 
-        {/* Error Message Display */}
+        {/* Only show error banner when there's an error */}
         {errorMessage && (
-          <div className="error-banner" onClick={() => setErrorMessage(null)}>
-            ⚠️ {errorMessage}
-            <button className="error-dismiss">✕</button>
+          <div className="error-banner">
+            <div className="error-content">
+              <span>⚠️ {errorMessage}</span>
+              {hasErrors && (
+                <button 
+                  className="show-logs-button"
+                  onClick={showErrorLogs}
+                >
+                  Show Details
+                </button>
+              )}
+            </div>
+            <button 
+              className="error-dismiss"
+              onClick={dismissError}
+            >
+              ✕
+            </button>
           </div>
         )}
 
         {/* Sync Status Indicator */}
         <div className={`sync-indicator ${syncStatus}`}>
-          {syncStatus === 'synced' && '✓ All changes saved'}
-          {syncStatus === 'pending' && '⏳ Changes pending...'}
-          {syncStatus === 'syncing' && '↻ Syncing...'}
-          {syncStatus === 'error' && '⚠️ Sync error'}
+          {getSyncStatusMessage()}
         </div>
-
-        {/* Debug Button (only in development) */}
-        {process.env.NODE_ENV === 'development' && (
-          <button 
-            className="debug-button"
-            onClick={showErrorLogs}
-          >
-            Show Error Logs
-          </button>
-        )}
       </div>
     </div>
   );

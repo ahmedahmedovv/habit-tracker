@@ -308,7 +308,26 @@ button:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.error-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.show-logs-button {
+  background-color: #856404;
+  color: white;
+  padding: 4px 8px;
+  font-size: 12px;
+  border: none;
+  border-radius: 3px;
   cursor: pointer;
+}
+
+.show-logs-button:hover {
+  background-color: #6d5204;
 }
 
 .error-dismiss {
@@ -317,6 +336,27 @@ button:hover {
   color: #856404;
   cursor: pointer;
   padding: 0 8px;
+  font-size: 16px;
+}
+
+.error-dismiss:hover {
+  color: #553203;
+}
+
+@media screen and (max-width: 480px) {
+  .error-banner {
+    font-size: 13px;
+    padding: 8px;
+  }
+
+  .error-content {
+    gap: 8px;
+  }
+
+  .show-logs-button {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
 }
 
 .debug-button {
