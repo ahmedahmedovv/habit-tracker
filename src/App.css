@@ -71,9 +71,26 @@ button:hover {
 .habit-left {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   flex: 1;
   min-width: 0;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.habit-left:hover {
+  background-color: #f5f5f5;
+}
+
+.habit-left:active {
+  background-color: #eeeeee;
+}
+
+.habit-left input[type="checkbox"] {
+  cursor: pointer;
 }
 
 .habit-right {

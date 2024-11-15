@@ -439,11 +439,18 @@ function App() {
               ) : (
                 // Normal mode
                 <>
-                  <div className="habit-left">
+                  <div 
+                    className="habit-left"
+                    onClick={() => toggleHabit(habit.id)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyPress={(e) => e.key === 'Enter' && toggleHabit(habit.id)}
+                  >
                     <input
                       type="checkbox"
                       checked={habit.completed}
-                      onChange={() => toggleHabit(habit.id)}
+                      onChange={() => {}} // Empty onChange to avoid React warning
+                      onClick={(e) => e.stopPropagation()} // Prevent double-toggle when clicking checkbox directly
                     />
                     <span className={`habit-name ${habit.completed ? 'completed' : ''}`}>
                       {habit.name}
