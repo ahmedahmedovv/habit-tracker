@@ -56,9 +56,33 @@ button:hover {
 .habit-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 15px 10px;
+  padding: 8px 4px;
   border-bottom: 1px solid #eee;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.habit-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.habit-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.habit-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  max-width: 120px;
 }
 
 .habit-item button {
@@ -76,9 +100,10 @@ button:hover {
 }
 
 .habit-item input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  margin-right: 10px;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  flex-shrink: 0;
 }
 
 @viewport {
@@ -88,7 +113,8 @@ button:hover {
 
 @media screen and (max-width: 480px) {
   .habit-item {
-    padding: 12px 8px;
+    padding: 10px 8px;
+    gap: 6px;
   }
   
   .habit-item button {
@@ -112,12 +138,13 @@ button:hover {
 
 .button-group {
   display: flex;
-  gap: 8px;
-  margin-left: auto;
+  gap: 4px;
 }
 
 .habit-item button.edit {
-  background-color: #2196F3;
+  padding: 2px 6px;
+  font-size: 12px;
+  height: 24px;
 }
 
 .habit-item button.edit:hover {
@@ -141,15 +168,10 @@ button:hover {
 }
 
 .habit-item button.delete {
-  background-color: #ff4444;
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
   padding: 0;
-  min-width: unset;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
 }
 
 @media screen and (max-width: 480px) {
@@ -186,15 +208,16 @@ button:hover {
 
 .habit-info {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  gap: 8px;
   flex: 1;
+  min-width: 0;
 }
 
 .streak-badge {
-  font-size: 0.8em;
-  color: #ff9800;
-  margin-top: 4px;
+  font-size: 0.7em;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 @media screen and (min-width: 480px) {
@@ -378,21 +401,23 @@ button:hover {
 .timer-controls {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 4px;
+  gap: 4px;
 }
 
 .timer-controls input {
-  width: 70px;
-  padding: 4px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  width: 40px;
+  padding: 2px 4px;
+  font-size: 12px;
 }
 
 .timer-button {
-  background-color: #2196F3;
-  padding: 4px 8px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
   font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .timer-button:disabled {
@@ -412,15 +437,68 @@ button:hover {
 @media screen and (max-width: 480px) {
   .timer-controls {
     flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 2px;
   }
   
   .timer-controls input {
-    width: 60px;
-    font-size: 13px;
+    width: 50px;
+    font-size: 12px;
+    padding: 3px;
   }
   
   .timer-button {
-    font-size: 13px;
+    font-size: 12px;
     padding: 3px 6px;
+    min-height: 24px;
+  }
+}
+
+@media screen and (max-width: 375px) {
+  .habit-tracker {
+    width: 95%;
+  }
+  
+  h1 {
+    font-size: 20px;
+    margin: 10px 0;
+  }
+  
+  .habit-item {
+    padding: 6px 4px;
+    gap: 4px;
+  }
+  
+  .habit-left {
+    gap: 4px;
+  }
+  
+  .habit-right {
+    gap: 4px;
+  }
+  
+  .timer-controls {
+    display: inline-flex;
+    gap: 4px;
+  }
+  
+  .timer-controls input {
+    width: 35px;
+  }
+  
+  .timer-button,
+  .habit-item button.edit {
+    padding: 2px 4px;
+  }
+  
+  .habit-item button.delete {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .streak-badge {
+    font-size: 0.7em;
+    margin: 0;
+    white-space: nowrap;
   }
 }

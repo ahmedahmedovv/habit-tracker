@@ -10,6 +10,29 @@ const ERROR_TYPES = {
   DATA: 'DATA_ERROR'
 };
 
+// Add this function at the top of your component
+const playAlertSound = () => {
+  // Create audio context for better mobile support
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  const audioContext = new AudioContext();
+
+  // Use a simple beep sound that's more likely to work on mobile
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+
+  // Configure the beep sound
+  oscillator.type = 'sine';
+  oscillator.frequency.setValueAtTime(800, audioContext.currentTime); // frequency in hertz
+  gainNode.gain.setValueAtTime(0.1, audioContext.currentTime); // volume
+
+  // Play the beep
+  oscillator.start();
+  oscillator.stop(audioContext.currentTime + 1); // Duration in seconds
+};
+
 function App() {
   const [habits, setHabits] = useState(() => {
     try {
@@ -361,9 +384,10 @@ function App() {
     return () => clearInterval(timerInterval);
   };
 
+  // Update the showNotification function
   const showNotification = (habitId) => {
     const habit = habits.find(h => h.id === habitId);
-    alert(`Timer Complete!\nFinished: ${habit.name}`);
+    playAlertSound();
   };
 
   const updateTimerDuration = (habitId, duration) => {
@@ -413,60 +437,48 @@ function App() {
         <div className="habits-list">
           {habits.map(habit => (
             <div key={habit.id} className="habit-item">
-              <input
-                type="checkbox"
-                checked={habit.completed}
-                onChange={() => toggleHabit(habit.id)}
-              />
-              {editingId === habit.id ? (
-                <div className="edit-mode">
+              <div className="habit-left">
+                <input
+                  type="checkbox"
+                  checked={habit.completed}
+                  onChange={() => toggleHabit(habit.id)}
+                />
+                <span className={`habit-name ${habit.completed ? 'completed' : ''}`}>
+                  {habit.name}
+                </span>
+              </div>
+              
+              <div className="habit-right">
+                {habit.streak > 0 && (
+                  <span className="streak-badge">
+                    🔥 {habit.streak} day{habit.streak !== 1 ? 's' : ''}
+                  </span>
+                )}
+                <div className="timer-controls">
                   <input
-                    type="text"
-                    value={editingText}
-                    onChange={(e) => setEditingText(e.target.value)}
-                    autoFocus
+                    type="number"
+                    min="0"
+                    value={habit.timerDuration}
+                    onChange={(e) => updateTimerDuration(habit.id, parseInt(e.target.value) || 0)}
+                    placeholder="Seconds"
                   />
-                  <button onClick={() => saveEdit(habit.id)} className="save">Save</button>
-                  <button onClick={cancelEdit} className="cancel">Cancel</button>
+                  {activeTimer === habit.id ? (
+                    <span className="timer-display">{timeLeft}s</span>
+                  ) : (
+                    <button
+                      onClick={() => startTimer(habit.id, habit.timerDuration)}
+                      disabled={!habit.timerDuration}
+                      className="timer-button"
+                    >
+                      ⏱️
+                    </button>
+                  )}
                 </div>
-              ) : (
-                <>
-                  <div className="habit-info">
-                    <span className={habit.completed ? 'completed' : ''}>
-                      {habit.name}
-                    </span>
-                    {habit.streak > 0 && (
-                      <span className="streak-badge">
-                        🔥 {habit.streak} day{habit.streak !== 1 ? 's' : ''}
-                      </span>
-                    )}
-                    <div className="timer-controls">
-                      <input
-                        type="number"
-                        min="0"
-                        value={habit.timerDuration}
-                        onChange={(e) => updateTimerDuration(habit.id, parseInt(e.target.value) || 0)}
-                        placeholder="Seconds"
-                      />
-                      {activeTimer === habit.id ? (
-                        <span className="timer-display">{timeLeft}s</span>
-                      ) : (
-                        <button
-                          onClick={() => startTimer(habit.id, habit.timerDuration)}
-                          disabled={!habit.timerDuration}
-                          className="timer-button"
-                        >
-                          ⏱️ Start
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  <div className="button-group">
-                    <button onClick={() => startEditing(habit)} className="edit">Edit</button>
-                    <button onClick={() => deleteHabit(habit.id)} className="delete">✕</button>
-                  </div>
-                </>
-              )}
+                <div className="button-group">
+                  <button onClick={() => startEditing(habit)} className="edit">Edit</button>
+                  <button onClick={() => deleteHabit(habit.id)} className="delete">✕</button>
+                </div>
+              </div>
             </div>
           ))}
         </div>
