@@ -47,18 +47,12 @@ function App() {
   const [editingId, setEditingId] = useState(null);
   const [editingText, setEditingText] = useState('');
   const [installPrompt, setInstallPrompt] = useState(null);
-  const [isInstalled, setIsInstalled] = useState(false);
-  const [syncStatus, setSyncStatus] = useState('synced'); // 'synced', 'pending', 'error'
-  const [pendingChanges, setPendingChanges] = useState(() => {
-    const savedChanges = localStorage.getItem('pendingChanges');
-    return savedChanges ? JSON.parse(savedChanges) : [];
-  });
+  const [syncStatus, setSyncStatus] = useState('synced');
   const [errorMessage, setErrorMessage] = useState(null);
-  const [lastError, setLastError] = useState(null);
   const [syncSupported, setSyncSupported] = useState(false);
   const [hasErrors, setHasErrors] = useState(false);
-  const [activeTimer, setActiveTimer] = useState(null); // Add this state
-  const [timeLeft, setTimeLeft] = useState(0);         // Add this state
+  const [activeTimer, setActiveTimer] = useState(null);
+  const [timeLeft, setTimeLeft] = useState(0);
 
   // Check for sync support and register if available
   useEffect(() => {
@@ -251,18 +245,6 @@ function App() {
     }
   };
 
-  // Error boundary for data operations
-  const safeDataOperation = async (operation, errorType) => {
-    try {
-      return await operation();
-    } catch (error) {
-      logError(errorType, error);
-      setErrorMessage('Operation failed. Please try again.');
-      setLastError(error);
-      return null;
-    }
-  };
-
   // Updated error logger
   const logError = (type, error, details = {}) => {
     const errorLog = {
@@ -376,7 +358,7 @@ function App() {
         if (prevTime <= 1) {
           clearInterval(timerInterval);
           setActiveTimer(null);
-          showNotification(habitId);
+          showNotification();
           return 0;
         }
         return prevTime - 1;
@@ -388,8 +370,7 @@ function App() {
   };
 
   // Update the showNotification function
-  const showNotification = (habitId) => {
-    const habit = habits.find(h => h.id === habitId);
+  const showNotification = () => {
     playAlertSound();
   };
 
